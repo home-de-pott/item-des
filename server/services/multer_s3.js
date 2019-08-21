@@ -16,17 +16,19 @@ const aws = require('aws-sdk');
         Bucket: 'itemsdescr'
     }).promise();
     for (let i =0; i< respons.Contents.length ;i++){
-        imagesUrlArray.push({img_src:'https://itemsdescr.s3.us-east-2.amazonaws.com/'+respons.Contents[i].Key ,})
-   
+        str = 'https://itemsdescr.s3.us-east-2.amazonaws.com/'+respons.Contents[i].Key,
+        imagesUrlArray.push({img_id: str.slice(46,55)	,img_src: str})
+        
+        
     }
-    //console.log(imagesUrlArray)
+    
     } catch (e) {
         console.log('error in S3 multer', e)
     }
 
  })();
+ module.exports = imagesUrlArray;
 
-module.exports = imagesUrlArray;
 
 
 

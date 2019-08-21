@@ -2,9 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import StarRatings from 'react-star-ratings';
 import axios from 'axios'
+import allItems from '../DataBase/allItems'
 import { error } from 'util';
 import { throws } from 'assert';
-import '../client/styleibra.css'
 const font ={
     fontSize: '2.0vw'
 }
@@ -14,6 +14,7 @@ class Itemsview extends React.Component {
         this.state={
             id: '',
             imagesArray:[],
+            carouselImagesArray:[],
             theClickedImg : '',
             brand: '',
             name: '',
@@ -23,14 +24,17 @@ class Itemsview extends React.Component {
             ratingArray: [],
             ratingAvg:0,
             isWidthToSmall: false,
-            frequentlyBoughtTogetherArray:[]
+            frequentlyBoughtTogetherArray:[],
+            allItemDroplest:[]
         }
     }
-
+        
+    
 
     componentDidMount(){
+        this.allAitemDropdownList()
         window.addEventListener('resize', (resize)=>{
-            if(resize.currentTarget.innerWidth < 860){
+            if(resize.currentTarget.innerWidth < 992){
                  this.setState({isWidthToSmall: true})
             }else{
                 this.setState({isWidthToSmall: false})
@@ -73,15 +77,14 @@ class Itemsview extends React.Component {
         axios.get(`/items-data/${id}`)
         .then((Response)=>{
             const htmlImages = this.gitImages(Response.data[1]);
-            console.log(htmlImages)
-            // const carouselImages = this.gitImagesCarousel(Response.data[1]);
+            const carouselImages = this.gitImagesCarousel(Response.data[1]);
             const frequentlyBoughtTogether = this.gitfrequentlyBoughtTogether(Response.data[2],Response.data[3],Response.data[0].id);
             const itemInfo = Response.data[0]
             const desc = this.getDescrption(itemInfo[0].description)
-            this.dataMunt(htmlImages,itemInfo,desc,id,frequentlyBoughtTogether)
+            this.dataMunt(htmlImages,itemInfo,desc,id,carouselImages,frequentlyBoughtTogether,Response.data[1][0].img_src)
             return Response})
-        .then((Response)=>{this.setState({theClickedImg: Response.data[1][0].img_src})})
-        .catch(()=>console.log('error in componandddd'));
+        .then((Response)=>{this.setState({ })})
+        .catch((error)=>console.log(error));
         
    
     }
@@ -98,24 +101,24 @@ class Itemsview extends React.Component {
        
     }
 
-//     gitImagesCarousel(Response){
-//         Response =  Response.map(item=>item.img_src)
-//    return Response;
-//     }
+    gitImagesCarousel(Response){
+        Response =  Response.map(item=>item.img_src)
+   return Response;
+    }
 
     gitImages(Response){
-        Response =  Response.map(item=><div> <img  onClick={()=>this.onImegeClick(item.img_src)}
-             src={item.img_src}  width='50%'></img></div>)
+        Response =  Response.map(item=> <img className='img-thumbnail' onClick={()=>this.onImegeClick(item.img_src)}
+             src={item.img_src}  width='60%'></img>)
         return Response;
     }
 
     getDescrption(description){
-    description = description.split(';').map(item=> <li  >{item}</li>)
+    description = description.split(';').map(item=> <li >{item}</li>)
         return description;
     }
     
 
-    dataMunt(htmlImages,itemInfo,desc,id,frequentlyBoughtTogether){
+    dataMunt(htmlImages,itemInfo,desc,id,carouselImages,frequentlyBoughtTogether,mainImage){
         this.setState({
             imagesArray: htmlImages,
             brand: itemInfo[0].brand,
@@ -123,7 +126,9 @@ class Itemsview extends React.Component {
             price: itemInfo[0].price,
             descrbtionArray: desc,
             id: id,
-            frequentlyBoughtTogetherArray:frequentlyBoughtTogether
+            carouselImagesArray: carouselImages,
+            frequentlyBoughtTogetherArray:frequentlyBoughtTogether,
+            theClickedImg:mainImage
         })
     }
 
@@ -134,6 +139,14 @@ class Itemsview extends React.Component {
         }
     }
 
+    onImegeClickRender(id){
+       
+        window.dispatchEvent(
+			new CustomEvent('updatePath', {
+				detail: {id: id},
+			})
+		)   
+    }
 
     incres(){
         this.state.quantity++;
@@ -158,98 +171,85 @@ class Itemsview extends React.Component {
     }
 
     addAllItemsToCart(){
+        const AllItems =[this.state.id,this.state.frequentlyBoughtTogetherArray[0].id,this.state.frequentlyBoughtTogetherArray[1].id]
         window.dispatchEvent(
-        new CustomEvent('addToCart', {
-            detail: {id: this.state.id , quantity: 1},
-        })
-        )
-        window.dispatchEvent(
-        new CustomEvent('addToCart', {
-            detail: {id: this.state.frequentlyBoughtTogetherArray[0] , quantity: 1},
-        })
-        )
-        window.dispatchEvent(
-        new CustomEvent('addToCart', {
-            detail: {id: this.state.frequentlyBoughtTogetherArray[1] , quantity: 1},
-        })
+			new CustomEvent('addItemsToCart', {
+				detail: {ids: AllItems},
+			})
         )
     }
     fullSizeScreen(){
-        return      (
-            <>   
-            <div className="col-3">
-                <h6 >Internet #{this.state.id}</h6>
-                
-                {this.state.imagesArray}
-            </div>
+        return      <div>    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-xs-3">
+        <h6 >Internet #{this.state.id}</h6>
         
-            <div id='mainImage' className="col-6">
-                <h6 > Model # DWHT51054 SKU #1001209802</h6>
+        {this.state.imagesArray}
+    </div>
+   
+    <div id='mainImage' className="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-xs-6">
+        <h6 > Model # DWHT51054 SKU #1001209802</h6>
 
-                <img default-src='none' src={this.state.theClickedImg} width='70%'></img> 
-            </div>
-        </>         )
+        <img default-src='none' src={this.state.theClickedImg} width='80%'></img> 
+    </div></div>          
     }
 
 
-    // phoneSizeImage(){
-    //     return <div><div id="IbrahimmyCarousel" className="carousel slide" data-ride="carousel">
+    phoneSizeImage(){
+        return <><div id="IbrahimmyCarousel" className="carousel slide" data-ride="carousel">
   
-    //     <ol className="carousel-indicators">
-    //       <li data-target="#IbrahimmyCarousel" data-slide-to="0" className="active"></li>
-    //       <li data-target="#IbrahimmyCarousel" data-slide-to="1"></li>
-    //       <li data-target="#IbrahimmyCarousel" data-slide-to="2"></li>
-    //     </ol>
-    //     <div className="carousel-inner">
-    //       <div className="carousel-item-active">
-    //         <img src={this.state.carouselImagesArray[0]} alt="0"></img>
-    //       </div>
+        <ol className="carousel-indicators">
+          <li data-target="#IbrahimmyCarousel" data-slide-to="0" className="active"></li>
+          <li data-target="#IbrahimmyCarousel" data-slide-to="1"></li>
+          <li data-target="#IbrahimmyCarousel" data-slide-to="2"></li>
+        </ol>
+        <div className="carousel-inner">
+          <div className="item active">
+            <img src={this.state.carouselImagesArray[0]} alt="0"></img>
+          </div>
       
-    //      {this.state.carouselImagesArray[1]?<div className="carousel-item">
-    //         <img src={this.state.carouselImagesArray[1]} alt="1"></img>
-    //       </div>:console.log()} 
+         <div className="item">
+            <img src={this.state.carouselImagesArray[1]} alt="1"></img>
+          </div>
       
-    //       {this.state.carouselImagesArray[2]?<div className="carousel-item">
-    //         <img src={this.state.carouselImagesArray[1]} alt="1"></img>
-    //       </div>:console.log()}
-    //     </div>
-    //     <a className="carousel-control-prev" href="#IbrahimmyCarousel" data-slide="prev">
-    //       <span className="carousel-control-prev-icon"></span>
-    //       <span className="sr-only">Previous</span>
-    //     </a>
-    //     <a className="carousel-control-next" href="#IbrahimmyCarousel" data-slide="next">
-    //       <span className="carousel-control-next-icon"></span>
-    //       <span className="sr-only">Next</span>
-    //     </a>
-    //   </div></div>
-    // }
+          <div className="item">
+            <img src={this.state.carouselImagesArray[2]} alt="2"></img>
+          </div>
+        </div>
+        <a className="left carousel-control" href="#IbrahimmyCarousel" data-slide="prev">
+    <span className="glyphicon glyphicon-chevron-left"></span>
+    <span className="sr-only">Previous</span>
+  </a>
+  <a className="right carousel-control" href="#IbrahimmyCarousel" data-slide="next">
+    <span className="glyphicon glyphicon-chevron-right"></span>
+    <span className="sr-only">Next</span>
+  </a>
+</div></>
+    }
 
     frequentlyBoughtTogetherRender(){
         return <>
-            <div className="col-2">
-                <img 
+            <div  className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                <img
              src={this.state.theClickedImg}  width='60%'></img>
              <h6 >{this.state.name}</h6>
                     </div>
                     
-                    <div className="col-1">
-                        <h2 style={{marginTop:'60px'}}>+</h2>
+                    <div className="col-xl-1 col-lg-1 col-md-1 col-sm-1 col-xs-1">
+                        <h2 style={{marginTop:'50px'}}>+</h2>
                     </div>
-                    <div className="col-2" onClick={()=>console.log('hi')}>
-                <img 
+                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                <img onClick={()=>this.onImegeClickRender(this.state.frequentlyBoughtTogetherArray[0].id)}
              src={this.state.frequentlyBoughtTogetherArray[0].src}  width='60%'></img>
              <h6 >{this.state.frequentlyBoughtTogetherArray[0].name}</h6>
                     </div>
-                    <div className="col-1">
-                        <h2 style={{marginTop:'60px'}}>+</h2>
+                    <div className="col-xl-1 col-lg-1 col-md-1 col-sm-1 col-xs-1">
+                        <h2 style={{marginTop:'50px'}}>+</h2>
                     </div>
-                    <div className="col-2">
-             <img onClick={()=>{this.setState({id: this.state.frequentlyBoughtTogetherArray[1].id})}}
+                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-xs-2">
+             <img onClick={()=>this.onImegeClickRender(this.state.frequentlyBoughtTogetherArray[1].id)}
              src={this.state.frequentlyBoughtTogetherArray[1].src}  width='60%'></img>
              <h6 >{this.state.frequentlyBoughtTogetherArray[1].name}</h6>
                     </div>
-                       
-                           <div className="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-xs-3"  >
+                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-xs-2"  >
                            <h3 style={{marginLeft: '5px',marginLeft: '20px' ,marginTop:'60px'}} type='text'>${this.state.price+this.state.frequentlyBoughtTogetherArray[0].price+this.state.frequentlyBoughtTogetherArray[1].price}</h3>
 
                         <form style={{alignItems:'center',marginRight: 'auto',marginLeft: '20px'}}>
@@ -257,53 +257,69 @@ class Itemsview extends React.Component {
 
                         </form>
                         </div>
-               
 
         </>
     }
-    
+    allAitemDropdownList(){
+    let itemsToRend=allItems.map((item)=><li onClick={()=>{window.dispatchEvent(
+        new CustomEvent('updatePath', {
+            detail: {id:item.id},
+        })
+        )}}><a>{item.name}</a></li>)
+        this.setState({allItemDroplest:itemsToRend})
+    }
     render(){
+        
         return(
-            
-            <div className="container-fluid row" >
-                <div className="row" style={{margin:'20px'}}>
-                    {this.state.isWidthToSmall?<div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12"> <img default-src='none' src={this.state.theClickedImg} width='100%'></img></div>:this.fullSizeScreen()}
+          
+            <div className="container-fluid" style={{margin:'20px'}}>
+               
+                  <div className="dropdown row">
+  <button className="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+  Select an Item
+    <span className="caret"></span>
+  </button>
+  <ul className="dropdown-menu" aria-labelledby="dropdownMenu1">
+{this.state.allItemDroplest}
+ 
+  </ul>
 
-                    <div className="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-xs-12" >
-                        <h6><strong>{this.state.brand}</strong></h6>
-                        <h6 > {this.state.name} </h6>
+            </div>
+                <div className="row" style={{margin:'20px'}}>
+                    {this.state.isWidthToSmall?this.phoneSizeImage():this.fullSizeScreen()}
+
+                    <div className="col-xl-3 col-lg-3 col-md-3 col-ms-3" >
+                        <h4 ><strong>{this.state.brand}</strong></h4>
+                        <h4  > {this.state.name} </h4>
                         <StarRatings
                         rating={this.state.ratingAvg}
                         starRatedColor="#f96302"
                         starDimension="20px"
                         starSpacing="2px"
                         />
-                        <h6 >Write a Review</h6>
-                        <h6>Questions & Answers ({this.state.ratingArray.length})</h6>
+                        <h5  >Write a Review</h5>
+                        <h5 >Questions & Answers ({this.state.ratingArray.length})</h5>
                         <ul>
                             {this.state.descrbtionArray}
                         </ul>
-                        <h5  >${this.state.price}</h5>
+                        <h3  >${this.state.price}</h3>
                         <img style={{maxWidth: '20px',width:'15%'}} src="https://assets.homedepot-static.com/p/static/images/icons/Credit-Card_Icon.svg"></img>
-                        <div>
-                        <small marginBottom ='10px' ><strong>Save up to $100♢</strong> on your qualifying purchase.
-                        Apply for a Home Depot Consumer Card</small></div>
-                        <div marginTop='15px'>
-                        <form  width='100px' >
+                        <h6 ><strong>Save up to $100♢</strong> on your qualifying purchase.
+                        Apply for a Home Depot Consumer Card</h6>
+                        <form margin='10px' >
                             <input style={{maxWidth: '25px' }} onClick={()=>this.decres()} type='button' value='-'></input>
-                            <input style={{maxWidth: '30px' ,width: '100%',marginLeft:'1px'}} type='text' min='1' value={this.state.quantity}></input>
-                            <input style={{maxWidth: '25px' ,marginLeft:'1px'}} onClick={()=>this.incres()} type='button' value='+'></input>
-                            <input style={{width:'100px', backgroundColor:"#f96302" ,color :'#fff'}} onClick={()=>this.addToCart()} type='button' value='Add to cart' ></input>
+                            <input style={{maxWidth: '20px' }} type='text' min='1' value={this.state.quantity}></input>
+                            <input style={{maxWidth: '25px' }} onClick={()=>this.incres()} type='button' value='+'></input>
+                            <input style={{maxWidth:'100px',width: '50%', backgroundColor:"#f96302" ,color :'#fff'}} onClick={()=>this.addToCart()} type='button' value='Add to cart' ></input>
                         </form>
-                        </div>
                     </div>
                 </div >
-            
-
-                
-                <div className='row Ibrahimfrec' style={{margin:'5px'}}>
+                <div>
                     <h2 >Frequently Bought Together</h2>
                     <hr></hr>
+                </div>
+                <div className='row'>
+                
                 </div>
             <div className='row'>
                 {this.state.frequentlyBoughtTogetherArray.length>1?this.frequentlyBoughtTogetherRender():<div></div>}
@@ -316,183 +332,3 @@ class Itemsview extends React.Component {
 }
 
 ReactDOM.render(<Itemsview />, document.getElementById('product'))
-
-
-
-
-
-
-
-//     // fullSizeScreen(){
-//     //     return      <div>    <div className="col-xl-3 col-lg-3 col-md-3 ">
-//     //     <h6 style={{fontSize: '1.0vw'}}>Internet #{this.state.id}</h6>
-        
-//     //     {this.state.imagesArray}
-//     // </div>
-   
-//     // <div id='mainImage' className="col-xl-6 col-lg-6 col-md-6 ">
-//     //     <h6 style={{fontSize: '1.0vw'}}> Model # DWHT51054 SKU #1001209802</h6>
-
-//     //     <img default-src='none' src={this.state.theClickedImg} width='100%'></img> 
-//     // </div></div>          
-//     // }
-
-
-//     // phoneSizeImage(){
-//     //     return <div><div id="myCarousel" className="carousel slide" data-ride="carousel">
-  
-//     //     <ol className="carousel-indicators">
-//     //       <li data-target="#myCarousel" data-slide-to="0" className="active"></li>
-//     //       <li data-target="#myCarousel" data-slide-to="1"></li>
-//     //       <li data-target="#myCarousel" data-slide-to="2"></li>
-//     //     </ol>
-//     //     <div className="carousel-inner">
-//     //       <div className="item active">
-//     //         <img src={this.state.carouselImagesArray[0]} alt="0"></img>
-//     //       </div>
-      
-//     //      {this.state.carouselImagesArray[1]?<div className="item">
-//     //         <img src={this.state.carouselImagesArray[1]} alt="1"></img>
-//     //       </div>:console.log()} 
-      
-//     //       {this.state.carouselImagesArray[2]?<div className="item">
-//     //         <img src={this.state.carouselImagesArray[1]} alt="1"></img>
-//     //       </div>:console.log()}
-//     //     </div>
-//     //     <a className="left carousel-control" href="#myCarousel" data-slide="prev">
-//     //       <span className="glyphicon glyphicon-chevron-left"></span>
-//     //       <span className="sr-only">Previous</span>
-//     //     </a>
-//     //     <a className="right carousel-control" href="#myCarousel" data-slide="next">
-//     //       <span className="glyphicon glyphicon-chevron-right"></span>
-//     //       <span className="sr-only">Next</span>
-//     //     </a>
-//     //   </div></div>
-//     // }
-
-//     frequentlyBoughtTogetherRender(){
-//         return <div>
-//             <div className="IbrahimFreqItems1">
-//                 <img
-//              src={this.state.theClickedImg}  width='100%'></img>
-//              <h6 style={{fontSize: '1.4vw'}}>{this.state.name}</h6>
-//                     </div>
-                    
-//                     <div className="IbrahimFreqItems2">
-//                         <h2 style={{marginTop:'135px'}}>+</h2> 
-//                                        <img
-//              src={this.state.frequentlyBoughtTogetherArray[1].src}  width='100%'></img>
-//              <h6 style={{fontSize: '1.4vw'}}>{this.state.frequentlyBoughtTogetherArray[1].name}</h6>
-//                     </div>
-//                     <div className="IbrahimFreqItems3">
-//                         <h2 style={{marginTop:'135px'}}>+</h2> 
-//                                     <img
-//              src={this.state.frequentlyBoughtTogetherArray[2].src}  width='100%'></img>
-//              <h6 style={{fontSize: '1.4vw'}}>{this.state.frequentlyBoughtTogetherArray[2].name}</h6>
-//                     </div>
-         
-                           
-//                         <form style={{alignItems:'center',marginRight: 'auto',marginLeft: 'auto'}}>
-//                         <label  style={{maxWidth:'300px',maxHeight:'100px',display:'block',marginRight: 'auto',marginLeft: '5px',fontSize: '3.0vw'}} type='text'>${this.state.price+this.state.frequentlyBoughtTogetherArray[1].price+this.state.frequentlyBoughtTogetherArray[2].price}</label>
-//                             <input   style={{backgroundColor:"#f96302" ,color :'#fff'  ,maxWidth:'200px',maxHeight:'170px',display:'block',marginRight: 'auto',marginLeft: '1px',width: '80%', height:'35px'}} onClick={()=>this.addAllItemsToCart()} type='button' value='Add all items to cart' ></input>
-
-//                         </form>
-                
-
-//         </div>
-//     }
-    
-//     render(){
-//         return(
-//             <div>
-//             <div  className="Ibrahimcontainer" >
-//                     {this.state.isWidthToSmall?  <div  className="IbrahimMainImage">
-       
-
-//         <img default-src='none' src={this.state.theClickedImg} width='100%'></img> 
-//     </div>:<div>    <div className="IbrahimImages">
-//         <h6 style={{fontSize: '1.0vw'}}>Internet #{this.state.id}</h6>
-        
-//         {this.state.imagesArray}
-//     </div>
-   
-//     <div  className="IbrahimMainImage ">
-//         <h6 style={{fontSize: '1.0vw'}}> Model # DWHT51054 SKU #1001209802</h6>
-
-//         <img default-src='none' src={this.state.theClickedImg} width='40%'></img> 
-//     </div></div>  }
-
-//                     <div className="IbrahimitemInfo" >
-//                         <h4 style={font}><strong>{this.state.brand}</strong></h4>
-//                         <h4  style={font}> {this.state.name} </h4>
-//                         <StarRatings
-//                         rating={this.state.ratingAvg}
-//                         starRatedColor="#f96302"
-//                         starDimension="20px"
-//                         starSpacing="2px"
-//                         />
-//                         <h5  style={font}>Write a Review</h5>
-//                         <h5 style={font}>Questions & Answers ({this.state.ratingArray.length})</h5>
-//                         <ul>
-//                             {this.state.descrbtionArray}
-//                         </ul>
-//                         <h1  style={{fontSize: '2.4vw'}}>${this.state.price}</h1>
-//                         <img style={{maxWidth: '20px',width:'15%'}} src="https://assets.homedepot-static.com/p/static/images/icons/Credit-Card_Icon.svg"></img>
-//                         <h6 style={{fontSize: '1.2vw'}}><strong>Save up to $100♢</strong> on your qualifying purchase.
-//                         Apply for a Home Depot Consumer Card</h6>
-//                         <form margin='10px' >
-//                             <input style={{maxWidth: '25px' }} onClick={()=>this.decres()} type='button' value='-'></input>
-//                             <input style={{maxWidth: '20px' }} type='text' min='1' value={this.state.quantity}></input>
-//                             <input style={{maxWidth: '25px' }} onClick={()=>this.incres()} type='button' value='+'></input>
-//                             <input style={{maxWidth:'100px',width: '50%', backgroundColor:"#f96302" ,color :'#fff'}} onClick={()=>this.addToCart()} type='button' value='Add to cart' ></input>
-//                         </form>
-//                     </div>
-//                     </div>
-//                     <div className='Ibrahimcontainer'>
-//                 <div className="IbrahimFreqWord">
-//                     <h2 style={{fontSize: '3.4vw'}}>Frequently Bought Together</h2>
-//                     <hr></hr>
-//                 </div>
-//         </div>
-//            <div className='Ibrahimcontainer'>
-//                 {/* <h1>{this.state.frequentlyBoughtTogetherArray.length}</h1> */}
-//                 {this.state.frequentlyBoughtTogetherArray.length>1?<div>
-//             <div className="IbrahimFreqItems1">
-//                 <img
-//              src={this.state.theClickedImg}  width='100%'></img>
-//              <h6 style={{fontSize: '1.4vw'}}>{this.state.name}</h6>
-//                     </div>
-                    
-//                     <div className="IbrahimFreqItems2">
-//                         <h2 style={{marginTop:'135px'}}>+</h2> 
-//                                        <img
-//              src={this.state.frequentlyBoughtTogetherArray[1].src}  width='100%'></img>
-//              <h6 style={{fontSize: '1.4vw'}}>{this.state.frequentlyBoughtTogetherArray[1].name}</h6>
-//                     </div>
-//                     <div className="IbrahimFreqItems3">
-//                         <h2 style={{marginTop:'135px'}}>+</h2> 
-//                                     <img
-//              src={this.state.frequentlyBoughtTogetherArray[2].src}  width='100%'></img>
-//              <h6 style={{fontSize: '1.4vw'}}>{this.state.frequentlyBoughtTogetherArray[2].name}</h6>
-//                     </div>
-         
-                           
-//                         <form style={{alignItems:'center',marginRight: 'auto',marginLeft: 'auto'}}>
-//                         <label  style={{maxWidth:'300px',maxHeight:'100px',display:'block',marginRight: 'auto',marginLeft: '5px',fontSize: '3.0vw'}} type='text'>${this.state.price+this.state.frequentlyBoughtTogetherArray[1].price+this.state.frequentlyBoughtTogetherArray[2].price}</label>
-//                             <input   style={{backgroundColor:"#f96302" ,color :'#fff'  ,maxWidth:'200px',maxHeight:'170px',display:'block',marginRight: 'auto',marginLeft: '1px',width: '80%', height:'35px'}} onClick={()=>this.addAllItemsToCart()} type='button' value='Add all items to cart' ></input>
-
-//                         </form>
-                
-
-//         </div>:<div></div>}
-//            </div>
-              
-// </div>
-         
-        
-       
-//         )
-//     }
-// }
-
-// ReactDOM.render(<Itemsview />, document.getElementById('product'))

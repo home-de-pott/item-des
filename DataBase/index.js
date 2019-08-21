@@ -1,5 +1,6 @@
 const mysql      = require('mysql');
-const allItems = require('./allItems.js')
+// const allItems = require('./allItems.js')
+// const imagesArray = require('./allImages.js')
 require('dotenv').config();
 const connection = mysql.createConnection({
   host     : 'remotemysql.com',
@@ -9,8 +10,8 @@ const connection = mysql.createConnection({
   Port: 3306
 });
  
-connection.connect();
- 
+
+ console.log()
 const getOneItemInfo = function(id,cb) {
   const oneItemData =[];
   connection.query(`select * from itemDescription WHERE itemDescription.id = ${id}`, function (error, results, fields) {
@@ -41,9 +42,9 @@ const getOneItemInfo = function(id,cb) {
               if (error){
                 cb(error)
               }else{
-                console.log(results[0].img_src)
+                // console.log(results[0].img_src)
                 relatedItemsImages.push(results[0].img_src)
-                if(relatedItemsImages.length === 4 || relatedItemsImages.length === oneItemData[2].length){
+                if(relatedItemsImages.length ===4 || relatedItemsImages.length === oneItemData[2].length){
                   oneItemData.push(relatedItemsImages)
                   cb(null,oneItemData)
                 }
@@ -72,7 +73,7 @@ const getOneItemInfo = function(id,cb) {
 //     }
 //   }
 // }
-// addAllImages()
+
 // function addAllItems(){
 //   for(let i =0 ;i<allItems.length;i++){
 //     connection.query(`INSERT INTO itemDescription VALUES (${allItems[i].id}, '${allItems[i].name}', "${allItems[i].description}", ${allItems[i].price},'${allItems[i].brand}','${allItems[i].category}');`, function (error, results, fields) {

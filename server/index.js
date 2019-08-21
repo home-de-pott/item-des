@@ -5,7 +5,7 @@ const bodyParser = require('body-parser')
 // const s3Images = require('./services/multer_s3.js')
 const db = require('../DataBase/index.js')
 const {PORT,HOST} = require('../config.js')
-const port = PORT || 3000;
+const port = 3022;
 const app = express()
 
 app.use(bodyParser.json())
@@ -18,11 +18,11 @@ app.get('/items-data/:id',(req,res)=>{
   db.getOneItemInfo(Number(req.params.id),(err,respons)=>{
     if(err){
 
-      console.log(err) ;
+      throw err ;
       
       res.send(err)
     }else{
-      console.log(respons)
+      console.log(respons[3])
         res.send(respons)
    
     }
@@ -45,4 +45,4 @@ app.get('/items-data/:id',(req,res)=>{
 //   res.send('HEY!')
 // })
  
-app.listen(3022,()=>console.log('listning on host: '+' port: '+port))
+app.listen(port,()=>console.log('listning on host: '+' port: '+port))
