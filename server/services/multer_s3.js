@@ -6,22 +6,22 @@ const aws = require('aws-sdk');
     try {
         aws.config.setPromisesDependency();
         aws.config.update({
-            secretAccessKey:'BxM4w1ERSVt8+nmUpqO9lCYq6DOocTnTXp+etB2G',
-            accessKeyId:'AKIAIHYZI4VZK2YFEFTQ',
+            secretAccessKey:'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',
+            accessKeyId:'AKIAIISHKZEIUP7RTT2A',
             region:'us-east-2'
         })
         const s3 = new aws.S3();
         const respons = await s3.listObjectsV2({
            
-        Bucket: 'itemsdescr'
+        Bucket: 'item-des'
     }).promise();
     for (let i =0; i< respons.Contents.length ;i++){
-        str = 'https://itemsdescr.s3.us-east-2.amazonaws.com/'+respons.Contents[i].Key,
-        imagesUrlArray.push({img_id: str.slice(46,55)	,img_src: str})
+        str = 'https://item-des.s3.us-east-2.amazonaws.com/'+respons.Contents[i].Key,
+        imagesUrlArray.push({img_id: str.slice(44,53)	,img_src: str})
         
         
     }
-    
+    // console.log(imagesUrlArray)
     } catch (e) {
         console.log('error in S3 multer', e)
     }

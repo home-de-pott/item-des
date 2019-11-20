@@ -80,7 +80,7 @@ class Itemsview extends React.Component {
             const carouselImages = this.gitImagesCarousel(Response.data[1]);
             const frequentlyBoughtTogether = this.gitfrequentlyBoughtTogether(Response.data[2],Response.data[3],Response.data[0].id);
             const itemInfo = Response.data[0]
-            const desc = this.getDescrption(itemInfo[0].description)
+            const desc = this.getDescrption(itemInfo[0].Description)
             this.dataMunt(htmlImages,itemInfo,desc,id,carouselImages,frequentlyBoughtTogether,Response.data[1][0].img_src)
             return Response})
         .then((Response)=>{this.setState({ })})
@@ -262,6 +262,7 @@ class Itemsview extends React.Component {
     }
     allAitemDropdownList(){
     let itemsToRend=allItems.map((item)=><li onClick={()=>{window.dispatchEvent(
+        
         new CustomEvent('updatePath', {
             detail: {id:item.id},
         })

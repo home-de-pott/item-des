@@ -1,17 +1,17 @@
 const mysql      = require('mysql');
-// const allItems = require('./allItems.js')
-// const imagesArray = require('./allImages.js')
+const allItems = require('./allItems.js')
+const s3Images = require('../server/services/multer_s3.js')
 require('dotenv').config();
 const connection = mysql.createConnection({
   host     : 'remotemysql.com',
-  user     : '5ZPVKjtvSa',
-  password : process.env.password,
-  database : '5ZPVKjtvSa',
+  user     : 'Ip2RZ22uSq',
+  password : 'EiiKf3NUtf',
+  database : 'Ip2RZ22uSq',
   Port: 3306
 });
  
 
- console.log()
+//  console.log('add')
 const getOneItemInfo = function(id,cb) {
   const oneItemData =[];
   connection.query(`select * from itemDescription WHERE itemDescription.id = ${id}`, function (error, results, fields) {
@@ -61,27 +61,29 @@ const getOneItemInfo = function(id,cb) {
 }
 
 
-// function addAllImages(err,imagesArray){
-//   if(err){
-//     throw err
-//   }else{
-//     for(let i =0 ;i<imagesArray.length;i++){
-//       connection.query(`INSERT INTO itemImages (img_id, img_src) VALUES (${imagesArray[i].img_id}, '${imagesArray[i].img_src}');`, function (error, results, fields) {
-//         if (error) throw error;
-        
-//       });
-//     }
-//   }
-// }
+function addAllImages(err,imagesArray){
+  if (err){
+    throw err
+  } else{
+    for(let i =0 ;i<imagesArray.length;i++){
+      connection.query(`INSERT INTO itemImages (img_id, img_src) VALUES (${imagesArray[i].img_id}, '${imagesArray[i].img_src}');`, function (error, results, fields) {
+        if (error) throw error;
+        // console.log(imagesArray[0])
+      });
+    }
+  }
+  
+}
 
+//  console.log(allItems)
 // function addAllItems(){
 //   for(let i =0 ;i<allItems.length;i++){
 //     connection.query(`INSERT INTO itemDescription VALUES (${allItems[i].id}, '${allItems[i].name}', "${allItems[i].description}", ${allItems[i].price},'${allItems[i].brand}','${allItems[i].category}');`, function (error, results, fields) {
 //       if (error) throw error;
-      
+//       console.log(allItems[0])
 //     });
 //   }
 // }
 // addAllItems()
 
-module.exports={getOneItemInfo}
+module.exports={getOneItemInfo, addAllImages}
