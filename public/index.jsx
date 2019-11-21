@@ -121,9 +121,9 @@ class Itemsview extends React.Component {
     dataMunt(htmlImages,itemInfo,desc,id,carouselImages,frequentlyBoughtTogether,mainImage){
         this.setState({
             imagesArray: htmlImages,
-            brand: itemInfo[0].brand,
+            brand: itemInfo[0].Brand,
             name: itemInfo[0].name,
-            price: itemInfo[0].price,
+            price: itemInfo[0].Price,
             descrbtionArray: desc,
             id: id,
             carouselImagesArray: carouselImages,
