@@ -42,7 +42,7 @@ class Itemsview extends React.Component {
         })
        
         if(this.state.id === ''){
-            this.getData(window.location.pathname.slice(10))
+            this.getData(205594063)
             this.getReview(window.location.pathname.slice(10))
         }
         window.addEventListener('updatePath', (e) => {
