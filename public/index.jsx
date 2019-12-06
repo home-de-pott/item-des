@@ -28,8 +28,7 @@ class Itemsview extends React.Component {
             allItemDroplest:[]
         }
     }
-        
-    
+  
 
     componentDidMount(){
         this.allAitemDropdownList()
@@ -76,6 +75,7 @@ class Itemsview extends React.Component {
 
         axios.get(`/items-data/${id}`)
         .then((Response)=>{
+            console.log()
             const htmlImages = this.gitImages(Response.data[1]);
             const carouselImages = this.gitImagesCarousel(Response.data[1]);
             const frequentlyBoughtTogether = this.gitfrequentlyBoughtTogether(Response.data[2],Response.data[3],Response.data[0].id);
@@ -107,13 +107,13 @@ class Itemsview extends React.Component {
     }
 
     gitImages(Response){
-        Response =  Response.map(item=> <img className='img-thumbnail' onClick={()=>this.onImegeClick(item.img_src)}
+        Response =  Response.map(item=> <img  className='img-thumbnail' onClick={()=>this.onImegeClick(item.img_src)}
              src={item.img_src}  width='60%'></img>)
         return Response;
     }
 
     getDescrption(description){
-    description = description.split(';').map(item=> <li >{item}</li>)
+    description = description.split(';').map(item=> <li style={{cursor: 'pointer'}}>{item}</li>)
         return description;
     }
     

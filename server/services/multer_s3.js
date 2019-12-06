@@ -6,8 +6,7 @@ const aws = require('aws-sdk');
     try {
         aws.config.setPromisesDependency();
         aws.config.update({
-            secretAccessKey:'T4uDjBcJONppniioJnyiD8pevMoKQy3TrSU+R0zG',
-            accessKeyId:'AKIAIISHKZEIUP7RTT2A',
+
             region:'us-east-2'
         })
         const s3 = new aws.S3();
